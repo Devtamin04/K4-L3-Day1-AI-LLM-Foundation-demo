@@ -4,16 +4,46 @@ import { useRef, useState } from "react";
 
 type Message = { role: "user" | "assistant"; content: string };
 
+type UsageEvent = {
+  type: "usage";
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  inputCost: number;
+  outputCost: number;
+  totalCost: number;
+};
+
+type DeltaEvent = { type: "delta"; text: string };
+
 const SUGGESTIONS = [
   "Temperature khác top_p ở điểm nào?",
   "Vì sao nên dùng streaming cho chatbot?",
   "Giải thích exponential backoff bằng ví dụ đời thường.",
 ];
 
-export default function ChatPanel() {
+function formatUsd(n: number) {
+  return `$${n.toFixed(5)}`;
+}
+
+function now() {
+  return performance.now();
+}
+
+export default function ChatPanel({
+  model,
+  onStreamingChange,
+}: {
+  model: string;
+  onStreamingChange?: (isStreaming: boolean) => void;
+}) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
+  const [lastUsage, setLastUsage] = useState<UsageEvent | null>(null);
+  const [sessionTokens, setSessionTokens] = useState(0);
+  const [sessionCost, setSessionCost] = useState(0);
+  const [lastLatency, setLastLatency] = useState<number | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   async function send(text: string) {
@@ -24,33 +54,52 @@ export default function ChatPanel() {
     setMessages(nextMessages);
     setInput("");
     setIsStreaming(true);
+    onStreamingChange?.(true);
     setMessages((m) => [...m, { role: "assistant", content: "" }]);
+
+    const start = now();
 
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages }),
+        body: JSON.stringify({ messages: nextMessages, model }),
       });
 
       if (!res.body) throw new Error("Không có phản hồi từ máy chủ.");
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
+      let buffer = "";
 
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-        const delta = decoder.decode(value, { stream: true });
-        setMessages((m) => {
-          const copy = [...m];
-          copy[copy.length - 1] = {
-            role: "assistant",
-            content: copy[copy.length - 1].content + delta,
-          };
-          return copy;
-        });
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const event: DeltaEvent | UsageEvent = JSON.parse(line);
+
+          if (event.type === "delta") {
+            setMessages((m) => {
+              const copy = [...m];
+              copy[copy.length - 1] = {
+                role: "assistant",
+                content: copy[copy.length - 1].content + event.text,
+              };
+              return copy;
+            });
+            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+          } else if (event.type === "usage") {
+            setLastUsage(event);
+            setSessionTokens((t) => t + event.inputTokens + event.outputTokens);
+            setSessionCost((c) => c + event.totalCost);
+          }
+        }
       }
     } catch {
       setMessages((m) => {
@@ -62,7 +111,9 @@ export default function ChatPanel() {
         return copy;
       });
     } finally {
+      setLastLatency((now() - start) / 1000);
       setIsStreaming(false);
+      onStreamingChange?.(false);
     }
   }
 
@@ -72,10 +123,35 @@ export default function ChatPanel() {
         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-white text-lg">
           🎓
         </span>
-        <div>
+        <div className="flex-1">
           <p className="font-semibold leading-tight">Trợ giảng AI</p>
-          <p className="text-xs text-white/50">Hỏi đáp trực tiếp · streaming</p>
+          <p className="text-xs text-white/50">
+            Hỏi đáp trực tiếp · streaming ·{" "}
+            <span className="text-white/80">{model}</span>
+          </p>
         </div>
+      </div>
+
+      <div className="flex items-center gap-4 py-3 border-b border-white/10 text-xs text-white/60">
+        <span>
+          Token phiên này:{" "}
+          <span className="text-white font-medium">{sessionTokens}</span>
+        </span>
+        <span>
+          Chi phí ước tính:{" "}
+          <span className="text-white font-medium">{formatUsd(sessionCost)}</span>
+        </span>
+        {lastLatency !== null && (
+          <span>
+            Độ trễ:{" "}
+            <span className="text-white font-medium">{lastLatency.toFixed(2)}s</span>
+          </span>
+        )}
+        {lastUsage && (
+          <span className="ml-auto text-white/40">
+            Lượt cuối: {lastUsage.inputTokens} in / {lastUsage.outputTokens} out
+          </span>
+        )}
       </div>
 
       <div className="chat-scroll flex-1 min-h-0 overflow-y-auto py-5 space-y-4">

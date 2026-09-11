@@ -1,4 +1,4 @@
-import ChatPanel from "./ChatPanel";
+import ChatSection from "./ChatSection";
 
 export default function Home() {
   return (
@@ -21,27 +21,7 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_1.6fr] lg:items-stretch lg:h-[640px]">
-          <div className="rounded-[28px] bg-surface p-6 sm:p-8 shadow-sm border border-tan h-full">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-tan text-accent text-lg">
-              💡
-            </div>
-            <p className="mt-6 text-xs font-semibold tracking-widest text-foreground/40">
-              02 / CÁCH DÙNG
-            </p>
-            <p className="mt-3 text-2xl font-semibold">3 bước</p>
-            <p className="mt-1 text-sm text-foreground/60">
-              để có câu trả lời đầu tiên
-            </p>
-            <ul className="mt-6 space-y-3 text-sm text-foreground/70">
-              <li>1. Gõ câu hỏi vào ô chat bên phải</li>
-              <li>2. Xem câu trả lời stream theo từng chữ</li>
-              <li>3. Hỏi tiếp — trợ giảng nhớ ngữ cảnh cuộc trò chuyện</li>
-            </ul>
-          </div>
-
-          <ChatPanel />
-        </div>
+        <ChatSection />
 
         <p className="mt-10 text-xs text-foreground/40">
           Mô hình chạy qua Ollama Cloud (gpt-oss). Câu trả lời có thể chưa
