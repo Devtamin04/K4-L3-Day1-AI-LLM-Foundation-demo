@@ -1,69 +1,53 @@
-import Image from "next/image";
+import ChatPanel from "./ChatPanel";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <main className="flex-1 px-6 py-14 sm:px-12 lg:px-20">
+      <div className="mx-auto max-w-6xl">
+        <p className="text-xs font-semibold tracking-widest text-accent">
+          01 / TRỢ GIẢNG AI
+        </p>
+
+        <div className="mt-4 grid gap-10 lg:grid-cols-[1.3fr_1fr] lg:items-start">
+          <h1 className="text-4xl sm:text-5xl font-semibold leading-tight tracking-tight">
+            Một câu hỏi về AI.
+            <br />
+            Một câu trả lời <span className="text-accent">ngay lập tức.</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-base text-foreground/60 leading-relaxed lg:pt-2">
+            Hỏi bất cứ điều gì về LLM, prompt engineering hay cách dùng API —
+            trợ giảng AI trả lời ngắn gọn, trực tiếp bằng tiếng Việt, theo
+            từng chữ khi được sinh ra.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-[1fr_1.6fr] lg:items-stretch lg:h-[640px]">
+          <div className="rounded-[28px] bg-surface p-6 sm:p-8 shadow-sm border border-tan h-full">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-tan text-accent text-lg">
+              💡
+            </div>
+            <p className="mt-6 text-xs font-semibold tracking-widest text-foreground/40">
+              02 / CÁCH DÙNG
+            </p>
+            <p className="mt-3 text-2xl font-semibold">3 bước</p>
+            <p className="mt-1 text-sm text-foreground/60">
+              để có câu trả lời đầu tiên
+            </p>
+            <ul className="mt-6 space-y-3 text-sm text-foreground/70">
+              <li>1. Gõ câu hỏi vào ô chat bên phải</li>
+              <li>2. Xem câu trả lời stream theo từng chữ</li>
+              <li>3. Hỏi tiếp — trợ giảng nhớ ngữ cảnh cuộc trò chuyện</li>
+            </ul>
+          </div>
+
+          <ChatPanel />
         </div>
-      </main>
-    </div>
+
+        <p className="mt-10 text-xs text-foreground/40">
+          Mô hình chạy qua Ollama Cloud (gpt-oss). Câu trả lời có thể chưa
+          hoàn toàn chính xác — hãy kiểm chứng lại với tài liệu chính thức.
+        </p>
+      </div>
+    </main>
   );
 }
